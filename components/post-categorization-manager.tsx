@@ -25,14 +25,14 @@ interface PostCategorizationManagerProps {
 function ActionButton({
   children,
   pendingText,
-  onClick, // Mantido para outros usos, mas não será usado para a submissão direta da AI Action
+  // Removido onClick daqui
   disabled,
-}: { children: React.ReactNode; pendingText: string; onClick?: () => void; disabled?: boolean }) {
+}: { children: React.ReactNode; pendingText: string; disabled?: boolean }) {
   const { pending } = useFormStatus()
   return (
     <Button
       type="submit"
-      onClick={onClick} // Este onClick só será usado se o botão não for para submeter o formulário diretamente
+      // Removido onClick={onClick}
       disabled={pending || disabled}
       className="bg-mustard text-dark-text font-semibold hover:bg-mustard-hover hover:scale-105 shadow-sm transition-transform"
     >

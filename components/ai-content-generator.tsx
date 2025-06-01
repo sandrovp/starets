@@ -19,30 +19,6 @@ interface AIContentGeneratorProps {
   activeInstructions: AIInstruction[]
 }
 
-// Componente auxiliar para o botão de submit com status de formulário
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  console.log("SubmitButton pending status:", pending) // Adicionado console.log
-
-  return (
-    <Button
-      type="submit"
-      className="w-full bg-mustard text-dark-text font-semibold hover:bg-mustard-hover hover:scale-105 shadow-sm transition-transform"
-      disabled={pending}
-    >
-      {" "}
-      {/* Estilo do botão mostarda */}
-      {pending ? (
-        <span className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" /> Gerando...
-        </span>
-      ) : (
-        "Gerar Conteúdo"
-      )}
-    </Button>
-  )
-}
-
 // Componente auxiliar para o botão de salvar com status de formulário
 function SaveButton({ suggestionText, suggestedCategories }: { suggestionText: string; suggestedCategories: string }) {
   // Renomeado suggestedCategory
@@ -105,6 +81,30 @@ export function AIContentGenerator({ allCategories, activeInstructions }: AICont
     // Renomeado toggleTag
     setSelectedCategories((prev) =>
       prev.includes(category) ? prev.filter((t) => t !== category) : [...prev, category],
+    )
+  }
+
+  // Componente inline para o botão de submit, para garantir o contexto correto do useFormStatus
+  const GenerateButton = () => {
+    const { pending } = useFormStatus()
+    console.log("GenerateButton pending status:", pending)
+
+    return (
+      <Button
+        type="submit"
+        className="w-full bg-mustard text-dark-text font-semibold hover:bg-mustard-hover hover:scale-105 shadow-sm transition-transform"
+        disabled={pending}
+      >
+        {" "}
+        {/* Estilo do botão mostarda */}
+        {pending ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Gerando...
+          </span>
+        ) : (
+          "Gerar Conteúdo"
+        )}
+      </Button>
     )
   }
 
@@ -213,7 +213,7 @@ export function AIContentGenerator({ allCategories, activeInstructions }: AICont
               className="border-muted text-dark-text font-inter focus:border-mustard focus:ring-mustard" // Estilo do textarea
             />
           </div>
-          <SubmitButton />
+          <GenerateButton />
         </form>
         {state.error && <p className="text-sm text-red-600">{state.error}</p>}
         {state.generatedContent && (
