@@ -10,6 +10,7 @@ const openrouter = createOpenRouter({
 })
 
 export async function autoClassifyPost(postId: string, availableCategories: string[]) {
+  console.log("autoClassifyPost: Iniciando para postId:", postId)
   if (!process.env.OPENROUTER_API_KEY) {
     console.error("OPENROUTER_API_KEY não configurada para auto-classificação.")
     return { success: false, message: "OPENROUTER_API_KEY não configurada." }
@@ -38,6 +39,8 @@ export async function autoClassifyPost(postId: string, availableCategories: stri
       return { success: false, message: `Erro ao buscar post: ${postError?.message}` }
     }
 
+    console.log("autoClassifyPost: Post encontrado. Legenda:", postData.caption.substring(0, 50) + "...")
+
     const postCaption = postData.caption
 
     const systemPrompt = `Você é um assistente de categorização de conteúdo. Sua tarefa é analisar a legenda de um post e atribuir a ele uma ou mais categorias relevantes de uma lista fornecida.
@@ -46,6 +49,8 @@ export async function autoClassifyPost(postId: string, availableCategories: stri
 
     const userPrompt = `Legenda do post: "${postCaption}"`
 
+    console.log("autoClassifyPost: Chamando IA com prompt:", userPrompt.substring(0, 100) + "...")
+
     const { text } = await generateText({
       model: openrouter.chat("openai/gpt-4o"),
       prompt: userPrompt,
@@ -53,6 +58,8 @@ export async function autoClassifyPost(postId: string, availableCategories: stri
       temperature: 0.2,
       maxTokens: 100,
     })
+
+    console.log("autoClassifyPost: Resposta da IA (raw):", text)
 
     const rawCategories = text.trim()
     const suggestedCategories = rawCategories
@@ -63,20 +70,31 @@ export async function autoClassifyPost(postId: string, availableCategories: stri
     const validSuggestedCategories = suggestedCategories.filter((cat) => availableCategories.includes(cat))
     const finalCategories = validSuggestedCategories.length > 0 ? validSuggestedCategories : ["Outros"]
 
+    console.log("autoClassifyPost: Categorias sugeridas pela IA:", finalCategories)
+
     // Salvar as categorias sugeridas no banco de dados
+    console.log(
+      "autoClassifyPost: Tentando atualizar Supabase para postId:",
+      postId,
+      "com categorias:",
+      finalCategories,
+    )
     const { error: updateError } = await supabase
       .from("posts_instagram")
       .update({ categories: finalCategories })
       .eq("id", postId)
 
     if (updateError) {
+      console.error("autoClassifyPost: Erro ao atualizar Supabase:", updateError)
       console.error("Erro ao salvar categorias auto-classificadas:", updateError)
       return { success: false, message: `Erro ao salvar categorias auto-classificadas: ${updateError.message}` }
     }
 
+    console.log("autoClassifyPost: Sucesso na atualização do Supabase para postId:", postId)
     revalidatePath("/categorization") // Revalida a página para mostrar as alterações
     return { success: true, message: `Post ${postId} auto-classificado com sucesso.` }
   } catch (error: any) {
+    console.error("autoClassifyPost: Erro na chamada da IA:", error)
     console.error("Erro inesperado na auto-classificação:", error)
     return {
       success: false,
