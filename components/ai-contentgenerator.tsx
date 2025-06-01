@@ -15,36 +15,13 @@ import { savePostSuggestion } from "@/actions/save-post-suggestion"
 import { useActionState } from "react"
 
 interface AIContentGeneratorProps {
-  allTags: string[]
+  allCategories: string[] // Renomeado de allTags
   activeInstructions: AIInstruction[]
 }
 
-// Componente auxiliar para o botão de submit com status de formulário
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  console.log("SubmitButton pending status:", pending) // Adicionado console.log
-
-  return (
-    <Button
-      type="submit"
-      className="w-full bg-mustard text-dark-text font-semibold hover:scale-105 shadow-sm transition-transform"
-      disabled={pending}
-    >
-      {" "}
-      {/* Estilo do botão mostarda */}
-      {pending ? (
-        <span className="flex items-center gap-2">
-          <Loader2 className="h-4 w-4 animate-spin" /> Gerando...
-        </span>
-      ) : (
-        "Gerar Conteúdo"
-      )}
-    </Button>
-  )
-}
-
 // Componente auxiliar para o botão de salvar com status de formulário
-function SaveButton({ suggestionText, suggestedCategory }: { suggestionText: string; suggestedCategory: string }) {
+function SaveButton({ suggestionText, suggestedCategories }: { suggestionText: string; suggestedCategories: string }) {
+  // Renomeado suggestedCategory
   const [saveState, saveAction] = useActionState(savePostSuggestion, {
     success: false,
     message: "",
@@ -55,10 +32,10 @@ function SaveButton({ suggestionText, suggestedCategory }: { suggestionText: str
   return (
     <form action={saveAction} className="space-y-2">
       <input type="hidden" name="suggestionText" value={suggestionText} />
-      <input type="hidden" name="suggestedCategory" value={suggestedCategory} />
+      <input type="hidden" name="suggestedCategories" value={suggestedCategories} /> {/* Renomeado name */}
       <Button
         type="submit"
-        className="w-full bg-mustard text-dark-text font-semibold hover:scale-105 shadow-sm transition-transform"
+        className="w-full bg-mustard text-dark-text font-semibold hover:bg-mustard-hover hover:scale-105 shadow-sm transition-transform"
         disabled={pending}
       >
         {" "}
@@ -89,8 +66,9 @@ const OPENROUTER_MODELS = [
   { id: "nousresearch/nous-hermes-2-mixtral-8x7b-dpo", name: "Nous Hermes 2 Mixtral" },
 ]
 
-export function AIContentGenerator({ allTags, activeInstructions }: AIContentGeneratorProps) {
-  const [selectedTags, setSelectedTags] = useState<string[]>([])
+export function AIContentGenerator({ allCategories, activeInstructions }: AIContentGeneratorProps) {
+  // Renomeado allTags
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]) // Renomeado selectedTags
   const [selectedModel, setSelectedModel] = useState<string>(OPENROUTER_MODELS[0].id)
   const [selectedInstructionId, setSelectedInstructionId] = useState<string>(activeInstructions[0]?.id || "")
 
@@ -99,8 +77,35 @@ export function AIContentGenerator({ allTags, activeInstructions }: AIContentGen
     error: null,
   })
 
-  const toggleTag = (tag: string) => {
-    setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]))
+  const toggleCategory = (category: string) => {
+    // Renomeado toggleTag
+    setSelectedCategories((prev) =>
+      prev.includes(category) ? prev.filter((t) => t !== category) : [...prev, category],
+    )
+  }
+
+  // Componente inline para o botão de submit, para garantir o contexto correto do useFormStatus
+  const GenerateButton = () => {
+    const { pending } = useFormStatus()
+    console.log("GenerateButton pending status:", pending)
+
+    return (
+      <Button
+        type="submit"
+        className="w-full bg-mustard text-dark-text font-semibold hover:bg-mustard-hover hover:scale-105 shadow-sm transition-transform"
+        disabled={pending}
+      >
+        {" "}
+        {/* Estilo do botão mostarda */}
+        {pending ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" /> Gerando...
+          </span>
+        ) : (
+          "Gerar Conteúdo"
+        )}
+      </Button>
+    )
   }
 
   return (
@@ -118,7 +123,7 @@ export function AIContentGenerator({ allTags, activeInstructions }: AIContentGen
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 border-muted text-secondary-text hover:bg-muted hover:text-dark-text"
+            className="h-8 w-8 border-muted text-secondary-text hover:bg-muted hover:text-primary-foreground"
           >
             {" "}
             {/* Estilo do botão */}
@@ -128,84 +133,87 @@ export function AIContentGenerator({ allTags, activeInstructions }: AIContentGen
         </Link>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <h3 className="text-sm font-medium mb-2 text-dark-text font-inter">Modelo de IA</h3> {/* Fonte e cor */}
-          <Select onValueChange={setSelectedModel} defaultValue={selectedModel}>
-            <SelectTrigger className="w-full border-muted text-secondary-text font-inter">
-              {" "}
-              {/* Estilo do select */}
-              <SelectValue placeholder="Selecione um modelo" />
-            </SelectTrigger>
-            <SelectContent className="font-inter">
-              {" "}
-              {/* Fonte do conteúdo do select */}
-              {OPENROUTER_MODELS.map((model) => (
-                <SelectItem key={model.id} value={model.id}>
-                  {model.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <input type="hidden" name="modelId" value={selectedModel} />
-        </div>
-
-        {activeInstructions.length > 0 && (
+        <form action={formAction} className="space-y-4">
+          {" "}
+          {/* O FORMULÁRIO AGORA ENVOLVE TUDO */}
           <div>
-            <h3 className="text-sm font-medium mb-2 text-dark-text font-inter">Instrução de IA (Opcional)</h3>{" "}
-            {/* Fonte e cor */}
-            <Select onValueChange={setSelectedInstructionId} defaultValue={selectedInstructionId}>
+            <h3 className="text-sm font-medium mb-2 text-dark-text font-inter">Modelo de IA</h3>
+            <Select onValueChange={setSelectedModel} defaultValue={selectedModel}>
               <SelectTrigger className="w-full border-muted text-secondary-text font-inter">
                 {" "}
                 {/* Estilo do select */}
-                <SelectValue placeholder="Selecione uma instrução" />
+                <SelectValue placeholder="Selecione um modelo" />
               </SelectTrigger>
               <SelectContent className="font-inter">
                 {" "}
                 {/* Fonte do conteúdo do select */}
-                {activeInstructions.map((instruction) => (
-                  <SelectItem key={instruction.id} value={instruction.id}>
-                    {instruction.name}
+                {OPENROUTER_MODELS.map((model) => (
+                  <SelectItem key={model.id} value={model.id}>
+                    {model.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            <input type="hidden" name="instructionId" value={selectedInstructionId} />
+            <input type="hidden" name="modelId" value={selectedModel} />
           </div>
-        )}
-
-        <div>
-          <h3 className="text-sm font-medium mb-2 text-dark-text font-inter">Tags para Contexto (Opcional)</h3>{" "}
-          {/* Fonte e cor */}
-          <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 border rounded-md bg-cream border-muted">
-            {" "}
-            {/* Fundo creme e borda */}
-            {allTags.map((tag) => (
-              <Badge
-                key={tag}
-                variant={selectedTags.includes(tag) ? "default" : "secondary"}
-                className={`cursor-pointer rounded-md font-inter ${selectedTags.includes(tag) ? "bg-mustard text-dark-text" : "bg-white text-secondary-text border border-muted"}`} // Estilo do badge
-                onClick={() => toggleTag(tag)}
-              >
-                {tag}
-              </Badge>
-            ))}
+          {activeInstructions.length > 0 && (
+            <div>
+              <h3 className="text-sm font-medium mb-2 text-dark-text font-inter">Instrução de IA (Opcional)</h3>{" "}
+              {/* Fonte e cor */}
+              <Select onValueChange={setSelectedInstructionId} defaultValue={selectedInstructionId}>
+                <SelectTrigger className="w-full border-muted text-secondary-text font-inter">
+                  {" "}
+                  {/* Estilo do select */}
+                  <SelectValue placeholder="Selecione uma instrução" />
+                </SelectTrigger>
+                <SelectContent className="font-inter">
+                  {" "}
+                  {/* Fonte do conteúdo do select */}
+                  {activeInstructions.map((instruction) => (
+                    <SelectItem key={instruction.id} value={instruction.id}>
+                      {instruction.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <input type="hidden" name="instructionId" value={selectedInstructionId} />
+            </div>
+          )}
+          <div>
+            <h3 className="text-sm font-medium mb-2 text-dark-text font-inter">Categorias para Contexto (Opcional)</h3>{" "}
+            {/* Renomeado de Tags para Categorias */}
+            <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1 border rounded-md bg-cream border-muted">
+              {" "}
+              {/* Fundo creme e borda */}
+              {allCategories.map(
+                (
+                  category, // Renomeado allTags para allCategories
+                ) => (
+                  <Badge
+                    key={category}
+                    variant={selectedCategories.includes(category) ? "default" : "secondary"} // Renomeado selectedTags
+                    className={`cursor-pointer rounded-md font-inter ${selectedCategories.includes(category) ? "bg-mustard text-dark-text" : "bg-white text-secondary-text border border-muted"}`} // Renomeado selectedTags
+                    onClick={() => toggleCategory(category)} // Renomeado toggleTag
+                  >
+                    {category}
+                  </Badge>
+                ),
+              )}
+            </div>
+            <input type="hidden" name="selectedCategories" value={selectedCategories.join(",")} />{" "}
+            {/* Renomeado name */}
           </div>
-          <input type="hidden" name="selectedTags" value={selectedTags.join(",")} />
-        </div>
-        <div>
-          <h3 className="text-sm font-medium mb-2 text-dark-text font-inter">Seu Prompt</h3> {/* Fonte e cor */}
-          <Textarea
-            name="userPrompt"
-            placeholder="Ex: Crie um post sobre a importância da comunicação na família."
-            rows={4}
-            required
-            className="border-muted text-dark-text font-inter focus:border-mustard focus:ring-mustard" // Estilo do textarea
-          />
-        </div>
-        <form action={formAction}>
-          {" "}
-          {/* O formulário deve envolver o SubmitButton */}
-          <SubmitButton />
+          <div>
+            <h3 className="text-sm font-medium mb-2 text-dark-text font-inter">Seu Prompt</h3> {/* Fonte e cor */}
+            <Textarea
+              name="userPrompt"
+              placeholder="Ex: Crie um post sobre a importância da comunicação na família."
+              rows={12}
+              required
+              className="border-muted text-dark-text font-inter focus:border-mustard focus:ring-mustard" // Estilo do textarea
+            />
+          </div>
+          <GenerateButton />
         </form>
         {state.error && <p className="text-sm text-red-600">{state.error}</p>}
         {state.generatedContent && (
@@ -213,11 +221,12 @@ export function AIContentGenerator({ allTags, activeInstructions }: AIContentGen
             <h3 className="text-sm font-medium text-dark-text font-inter">Conteúdo Gerado:</h3>
             <Textarea
               value={state.generatedContent}
-              rows={5}
+              rows={20}
               readOnly
               className="border-muted text-dark-text font-inter"
             />
-            <SaveButton suggestionText={state.generatedContent} suggestedCategory={selectedTags.join(",")} />
+            <SaveButton suggestionText={state.generatedContent} suggestedCategories={selectedCategories.join(",")} />{" "}
+            {/* Renomeado suggestedCategory */}
           </div>
         )}
       </CardContent>

@@ -72,7 +72,7 @@
   body {
     @apply text-foreground;
     /* Fundo creme suave com gradiente para salmão claro no rodapé */
-    background: linear-gradient(to bottom, #fff9ec, #fffaf0);
+    background: linear-gradient(to bottom, #fff9ec, #ffb347); /* Amarelo creme para Laranja Solar */
     min-height: 100vh; /* Garante que o gradiente cubra toda a altura */
     font-family: "Inter", sans-serif; /* Aplica Inter como fonte padrão para o corpo */
   }

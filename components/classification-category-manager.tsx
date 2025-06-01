@@ -88,7 +88,7 @@ export default function ClassificationCategoryManager({ initialCategories }: Cla
   return (
     <Card className="rounded-xl shadow-sm border border-muted">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-xl font-semibold font-playfair-display text-dark-text flex items-center gap-2">
+        <CardTitle className="text-xl font-semibold font-playfair-display text-dark-text">
           <Tag className="h-6 w-6" />
           Gerenciar Categorias de Classificação
         </CardTitle>
