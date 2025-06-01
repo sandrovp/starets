@@ -27,35 +27,41 @@ export default async function CategorizationPage() {
   // Lógica de auto-classificação
   const classificationPromises: Promise<any>[] = []
   for (const post of instagramPosts) {
-    // Classifica apenas se não tiver categorias
+    // Classifica se não tiver categorias OU se tiver apenas a categoria "uncategorized"
+    const shouldAutoClassify =
+      !post.categories ||
+      post.categories.length === 0 ||
+      (post.categories.length === 1 && post.categories[0] === "uncategorized")
+
     console.log(
       "CategorizationPage: Verificando post para auto-classificação. ID:",
       post.id,
       "Categorias:",
       post.categories,
+      "Deve auto-classificar:",
+      shouldAutoClassify,
     )
-    if (!post.categories || post.categories.length === 0) {
-      console.log(`Auto-classificando post sem categorias: ${post.id}`)
+
+    if (shouldAutoClassify) {
+      console.log(
+        `Auto-classificando post: ${post.id} (categorias atuais: ${post.categories?.join(", ") || "nenhuma"})`,
+      )
       console.log("CategorizationPage: Chamando autoClassifyPost para o post:", post.id)
-      // Adiciona a promessa de classificação à lista
       classificationPromises.push(autoClassifyPost(post.id!, availableCategoryNames))
     }
   }
 
-  // Aguarda todas as classificações automáticas
-  // Usamos Promise.allSettled para que uma falha em uma classificação não impeça as outras
   console.log("CategorizationPage: Aguardando todas as classificações automáticas...")
   await Promise.allSettled(classificationPromises)
   console.log("CategorizationPage: Classificações automáticas concluídas. Re-buscando posts...")
 
-  // Re-fetch posts para garantir que os dados mais recentes (incluindo os auto-classificados) sejam passados para o cliente
   const updatedInstagramPosts = await getInstagramPosts()
   console.log("CategorizationPage: Posts atualizados carregados:", updatedInstagramPosts.length)
 
   return (
     <div className="container mx-auto px-4 py-8">
       <PostCategorizationManager
-        initialPosts={updatedInstagramPosts} // Passa os posts atualizados
+        initialPosts={updatedInstagramPosts}
         availableClassificationCategories={classificationCategories}
       />
     </div>
