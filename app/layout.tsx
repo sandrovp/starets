@@ -28,7 +28,7 @@ export default function RootLayout({
       <body>
         <Header />
         {/* Adicionado bg-transparent para permitir que o gradiente do body apareça */}
-        <main className="bg-transparent">{children}</main>
+        <main>{children}</main>
       </body>
     </html>
   )

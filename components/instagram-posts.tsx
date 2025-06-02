@@ -24,21 +24,21 @@ export default function InstagramPosts({
 
   return (
     <div className="container mx-auto px-6 py-6">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+        {/* <div className="lg:col-span-1">
           <div className="space-y-6">
             {posts.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>
           <div className="text-center mt-6 text-sm text-secondary-text font-inter">Total de {posts.length} posts</div>
-        </div>
-        <div className="lg:col-span-1">
+        </div> */}
+        <div className="lg:col-span-2">
           <div>
             <AnalyticsPanel posts={posts} />
           </div>
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-4">
           <div>
             <AIContentGenerator allCategories={allUniqueCategories} activeInstructions={activeInstructions} />
           </div>

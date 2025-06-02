@@ -64,7 +64,7 @@ export default function AnalyticsPanel({ posts }: { posts: Post[] }) {
         <CardHeader>
           <CardTitle className="text-lg font-playfair-display text-dark-text flex items-center gap-2">
             <BarChart3 className="h-5 w-5" />
-            Estatísticas Gerais
+            Posts
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -107,7 +107,8 @@ export default function AnalyticsPanel({ posts }: { posts: Post[] }) {
           <div className="space-y-2">
             {analytics.topCategories.map(([category, count], index) => (
               <div key={category} className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
+                {/* Lado esquerdo com largura fixa */}
+                <div className="flex items-center gap-2 min-w-[150px]">
                   <span className="text-sm font-medium text-secondary-text font-inter">#{index + 1}</span>
                   <Badge
                     variant="outline"
@@ -116,19 +117,24 @@ export default function AnalyticsPanel({ posts }: { posts: Post[] }) {
                     {category}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-16 bg-muted rounded-full h-2">
+
+                {/* Lado direito: barra + número */}
+                <div className="flex items-center gap-2 flex-1">
+                  <div className="w-full bg-muted rounded-full h-2 relative overflow-hidden">
                     <div
                       className="bg-pastel-bar-1 h-2 rounded-full"
                       style={{ width: `${(count / analytics.topCategories[0][1]) * 100}%` }}
                     />
                   </div>
-                  <span className="text-sm font-medium text-dark-text font-inter">{count}</span>
+                  <span className="text-sm font-medium text-dark-text font-inter w-6 text-right">
+                    {count}
+                  </span>
                 </div>
               </div>
             ))}
           </div>
         </CardContent>
+
       </Card>
       <Card className="rounded-xl shadow-sm border border-muted">
         <CardHeader>
@@ -148,21 +154,30 @@ export default function AnalyticsPanel({ posts }: { posts: Post[] }) {
                   year: "numeric",
                 },
               )
+
+              const maxCount = Math.max(...analytics.recentMonths.map(([, c]) => c))
+              const percentage = (count / maxCount) * 100
+
               return (
-                <div key={month} className="flex items-center justify-between">
-                  <span className="text-sm text-secondary-text capitalize font-inter">{monthName}</span>
-                  <div
-                    className="w-12 bg-muted rounded-full h-2"
-                    style={{ width: `${(count / Math.max(...analytics.recentMonths.map(([, c]) => c))) * 100}%` }}
-                  >
-                    <div className="bg-pastel-bar-2 h-2 rounded-full" />
+                <div key={month} className="flex items-center gap-2">
+                  <span className="text-sm text-secondary-text capitalize font-inter min-w-[120px]">
+                    {monthName}
+                  </span>
+                  <div className="flex-1 bg-muted rounded-full h-2 relative overflow-hidden">
+                    <div
+                      className="bg-pastel-bar-2 h-2 rounded-full"
+                      style={{ width: `${percentage}%` }}
+                    />
                   </div>
-                  <span className="text-sm font-medium text-dark-text font-inter">{count}</span>
+                  <span className="text-sm font-medium text-dark-text font-inter w-6 text-right">
+                    {count}
+                  </span>
                 </div>
               )
             })}
           </div>
         </CardContent>
+
       </Card>
     </div>
   )
